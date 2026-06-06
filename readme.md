@@ -1,0 +1,1 @@
+# Adaptives FIR-Filter zur Spektralschätzung (LPC)
