@@ -88,7 +88,7 @@ for i, col in enumerate(cols):
         pcm16 = (np.clip(samples, -1.0, 1.0) * 32767).astype(np.int16)
         wbuf = io.BytesIO()
         wavfile.write(wbuf, L.FS, pcm16)
-        with st.expander("Download (Moodle)"):
+        with st.expander("Download"):
             st.download_button("WAV", wbuf.getvalue(),
                                f"aufnahme{i + 1}_16k.wav", "audio/wav", key=f"w{i}")
             st.download_button("RAW int16", pcm16.astype("<i2").tobytes(),
