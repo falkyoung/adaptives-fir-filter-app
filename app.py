@@ -62,10 +62,11 @@ for i, col in enumerate(cols):
         st.markdown(f"### Aufnahme {i + 1}")
         audio = st.audio_input("aufnehmen", key=f"audio_{i}",
                                label_visibility="collapsed")
-        upcol, playcol = st.columns([2, 1])
-        upload = upcol.file_uploader("oder: WAV-Datei hochladen", type=["wav"],
-                                     key=f"up_{i}")
-        if upload is not None:        # hochgeladene WAV direkt neben dem Feld anhoeren
+        st.caption("oder: WAV-Datei hochladen")
+        upcol, playcol = st.columns([2, 1], vertical_alignment="center")
+        upload = upcol.file_uploader("WAV-Datei", type=["wav"], key=f"up_{i}",
+                                     label_visibility="collapsed")
+        if upload is not None:        # hochgeladene WAV mittig daneben anhoeren
             playcol.audio(upload)
         source = upload if upload is not None else audio   # Upload hat Vorrang
         if source is None:
