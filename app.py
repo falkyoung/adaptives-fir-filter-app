@@ -106,4 +106,4 @@ if len(results) >= 2:
 
 # --- Footer ---
 st.markdown("---")
-st.caption("Made with ❤️ by Falk and Claude 4.8 Opus")
+st.caption("Made with ❤️ for AdaSys (by Falk and Claude 4.8 Opus)")
