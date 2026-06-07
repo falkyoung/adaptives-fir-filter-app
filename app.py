@@ -62,8 +62,11 @@ for i, col in enumerate(cols):
         st.markdown(f"### Aufnahme {i + 1}")
         audio = st.audio_input("aufnehmen", key=f"audio_{i}",
                                label_visibility="collapsed")
-        upload = st.file_uploader("oder: WAV-Datei hochladen", type=["wav"],
-                                  key=f"up_{i}")
+        upcol, playcol = st.columns([2, 1])
+        upload = upcol.file_uploader("oder: WAV-Datei hochladen", type=["wav"],
+                                     key=f"up_{i}")
+        if upload is not None:        # hochgeladene WAV direkt neben dem Feld anhoeren
+            playcol.audio(upload)
         source = upload if upload is not None else audio   # Upload hat Vorrang
         if source is None:
             continue
@@ -89,7 +92,6 @@ for i, col in enumerate(cols):
         st.pyplot(P.figure_coeffs(t, coeffs, figsize=SMALL, legend=False))
         st.pyplot(P.figure_error(t, err, L.FS, figsize=SMALL))
         st.pyplot(P.figure_signal(t, x, xhat, figsize=SMALL))
-        st.audio(source)
 
         pcm16 = (np.clip(samples, -1.0, 1.0) * 32767).astype(np.int16)
         wbuf = io.BytesIO()
