@@ -106,10 +106,6 @@ for i, col in enumerate(cols):
 if len(results) >= 2:
     st.subheader("Direkter Vergleich: LPC-Spektren übereinander")
     st.pyplot(P.figure_spectra_overlay(results, L.FS))
-    st.caption(
-        "Gleicher Vokal, andere Tonhöhe -> Kurven fast deckungsgleich.   "
-        "Anderer Vokal -> die Formant-Spitzen verschieben sich deutlich."
-    )
 
 # --- Footer ---
 st.markdown("---")
