@@ -1,10 +1,4 @@
-"""Matplotlib-Plots fuer die LPC-Analyse. Jede Funktion gibt eine Figure zurueck.
-
-Konventionen:
-- Legenden liegen ausserhalb der Kurven (rechts neben dem Plot).
-- layout="constrained" reserviert dafuer automatisch Platz.
-- figsize ist einstellbar (schmale Streamlit-Spalten).
-"""
+# Matplotlib-Plots
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -21,8 +15,6 @@ def _legend_right(ax, ncol=1):
 
 
 def figure_overview(t, x, fs=16000, figsize=(10, 3.6)):
-    """Kurzer Roh-Ueberblick ueber das Eingangssignal:
-    oben Amplitude (Zeitbereich), unten Frequenzspektrum (Welch)."""
     from scipy.signal import welch
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=figsize, layout="constrained")
 
@@ -87,7 +79,7 @@ def figure_error(t, err, fs=16000, figsize=(10, 3)):
     ax.plot(t[::s], rms[::s], lw=1.6, color="C3", label="RMS (20 ms)")
     ax.set_xlabel("Zeit [s]")
     ax.set_ylabel("e(t) = x - x_dach")
-    ax.set_title("Fehler e(t) wird kleiner  (Kosten E(t) = 0.5 e^2)")
+    ax.set_title("Fehler e(t) wird kleiner (E(t) = 0.5 e^2)")
     _legend_right(ax)
     ax.grid(alpha=0.3)
     return fig
@@ -100,7 +92,7 @@ def figure_coeffs(t, coeffs, figsize=(10, 4), legend=True):
         ax.plot(t[::s], coeffs[k, ::s], lw=1.0, label=f"a{k}")
     ax.set_xlabel("Zeit [s]")
     ax.set_ylabel("Koeffizientenwert a_k")
-    ax.set_title("Koeffizienten ueber die Zeit (Start bei 0)")
+    ax.set_title("Koeffizienten über die Zeit (Start bei 0)")
     if legend:
         _legend_right(ax, ncol=2)
     ax.grid(alpha=0.3)
@@ -151,7 +143,7 @@ def figure_lpcgram(t, coeffs, fs=16000, n_freq=256, n_frames=240):
                    extent=[t[0], t[-1], 0, fs / 2])
     ax.set_xlabel("Zeit [s]")
     ax.set_ylabel("Frequenz [Hz]")
-    ax.set_title("LPC-Spektrum ueber die Zeit  —  Vokal aendert die Formanten, "
-                 "Tonhoehe nicht")
+    ax.set_title("LPC-Spektrum über die Zeit: Vokal ändert die Formanten, "
+                 "Tonhöhe nicht")
     fig.colorbar(im, ax=ax, label="Betrag [dB]")
     return fig

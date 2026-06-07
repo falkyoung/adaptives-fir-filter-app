@@ -76,8 +76,6 @@ for i, col in enumerate(cols):
             samples, t, x, xhat, err, coeffs = process(source.getvalue())
         results.append((f"#{i + 1}", coeffs))
 
-        # Diagnose: bis wann ist ueberhaupt Signal da? (beantwortet die Frage
-        # "nimmt die Aufnahme nach ein paar Sekunden nichts mehr auf?")
         dur = len(samples) / L.FS
         w_env = max(1, int(0.03 * L.FS))
         env = np.sqrt(np.convolve(x ** 2, np.ones(w_env) / w_env, mode="same"))
