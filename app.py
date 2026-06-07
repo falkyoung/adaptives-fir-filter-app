@@ -48,6 +48,12 @@ def process(wav_bytes):
 
 SMALL = (5, 2.4)   # kompakte Plotgroesse fuer schmale Spalten
 
+st.caption(
+    "⚠️ Hinweis: Geräuschunterdrückung von Browser, System und Mikrofon muss "
+    "deaktiviert sein, sonst wird die Aufnahme nach 2-3 s unterdrückt. "
+    "Alternativ extern aufnehmen und je Spalte als WAV hochladen."
+)
+
 cols = st.columns(3)
 results = []   # (label, coeffs) fuer das Overlay unten
 
