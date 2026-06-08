@@ -15,7 +15,7 @@ import lpc_runner as L
 import lpc_plots as P
 
 st.set_page_config(page_title="Adaptives FIR-Filter", layout="wide")
-st.title("Adaptives FIR-Filter zur Spektralschätzung (LPC)")
+st.title("Adaptives FIR-Filter (LPC)")
 st.write(
     "Nimm **bis zu 3 kurze Aufnahmen** auf (je ~3-5 s, ein gehaltener Vokal) und "
     "vergleiche sie direkt nebeneinander. Z.B. **i / a / o** (verschiedene Vokale) "
