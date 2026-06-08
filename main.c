@@ -57,6 +57,4 @@ int main(int argc, char **argv) {
 
     fclose(in);
     fclose(out);
-    fprintf(stderr, "Fertig: %ld Samples verarbeitet.\n", t);
-    return 0;
 }
