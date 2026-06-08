@@ -54,9 +54,10 @@ st.caption(
     "Alternativ extern aufnehmen und je Spalte als WAV hochladen."
 )
 
-cols = st.columns(3)
-results = []   # (label, coeffs) fuer das Overlay unten
+data = [None, None, None]   # je Spalte: (samples, t, x, xhat, err, coeffs)
+results = []                # (label, coeffs) fuer das Overlay
 
+cols = st.columns(3)
 for i, col in enumerate(cols):
     with col:
         st.markdown(f"### Aufnahme {i + 1}")
@@ -74,6 +75,7 @@ for i, col in enumerate(cols):
 
         with st.spinner("main.c ..."):
             samples, t, x, xhat, err, coeffs = process(source.getvalue())
+        data[i] = (samples, t, x, xhat, err, coeffs)
         results.append((f"#{i + 1}", coeffs))
 
         dur = len(samples) / L.FS
@@ -84,10 +86,18 @@ for i, col in enumerate(cols):
         last = float(active[-1]) if len(active) else 0.0
         st.caption(f"{dur:.1f} s @ {L.FS} Hz · Signal aktiv bis {last:.1f} s")
 
-        # kurzer Roh-Ueberblick: womit arbeiten wir?
         st.pyplot(P.figure_overview(t, x, L.FS, figsize=(5, 3.4)))
-
         st.pyplot(P.figure_spectrum(coeffs, L.FS, figsize=SMALL))
+
+if len(results) >= 2:
+    st.pyplot(P.figure_spectra_overlay(results, L.FS, figsize=(15, 2.4)))
+
+cols2 = st.columns(3)
+for i, col in enumerate(cols2):
+    with col:
+        if data[i] is None:
+            continue
+        samples, t, x, xhat, err, coeffs = data[i]
         st.pyplot(P.figure_coeffs(t, coeffs, figsize=SMALL, legend=False))
         st.pyplot(P.figure_error(t, err, L.FS, figsize=SMALL))
         st.pyplot(P.figure_signal(t, x, xhat, figsize=SMALL))
@@ -102,11 +112,5 @@ for i, col in enumerate(cols):
                                f"aufnahme{i + 1}_16k.raw",
                                "application/octet-stream", key=f"r{i}")
 
-# Direkter Vergleich: Spektren uebereinander
-if len(results) >= 2:
-    st.subheader("Direkter Vergleich: LPC-Spektren übereinander")
-    st.pyplot(P.figure_spectra_overlay(results, L.FS))
-
-# --- Footer ---
 st.markdown("---")
 st.caption("Made with ❤️ for AdaSys (by Falk and Claude 4.8 Opus)")
