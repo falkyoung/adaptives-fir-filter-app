@@ -1,14 +1,3 @@
-"""
-Glue-Modul: Audio -> main.c (LMS) -> Arrays.
-
-Wiederverwendbar aus der Streamlit-App, einem Notebook oder einem Skript:
-
-    import lpc_runner as L
-    samples = L.read_wav("aufnahme.wav")          # oder eigenes np.array
-    t, x, xhat, err, coeffs = L.run_lpc(samples)
-
-main.c wird beim ersten Aufruf automatisch kompiliert.
-"""
 import shutil
 import subprocess
 from math import gcd
@@ -18,7 +7,7 @@ import numpy as np
 from scipy.signal import resample_poly
 
 FS = 16000
-NUM_COEFFS = 16
+MU = 0.02          # Lernrate des LMS-Filters
 
 HERE = Path(__file__).resolve().parent
 MAIN_C = HERE / "main.c"
@@ -68,19 +57,21 @@ def read_wav(path_or_buf):
     return to_mono_16k(data, sr)
 
 
-def run_lpc(samples):
+def run_lpc(samples, delays, mu=MU):
     """Schreibe Samples, rufe main.c, lies Ergebnis zurueck.
 
-    Returns: t [s], x, x_hat, error, coeffs (shape [16, N]).
+    delays: Liste der Tap-Verzoegerungen (z.B. aus make_delays).
+    Returns: t [s], x, x_hat, error, coeffs (shape [len(delays), N]).
     """
     ensure_binary()
     np.savetxt(SAMPLES, np.asarray(samples, dtype=np.float64), fmt="%.6f")
-    res = subprocess.run([str(BIN), str(SAMPLES), str(OUTPUT)],
-                         capture_output=True, text=True)
+    args = [str(BIN), str(SAMPLES), str(OUTPUT), str(mu)] + [str(d) for d in delays]
+    res = subprocess.run(args, capture_output=True, text=True)
     if res.returncode != 0:
         raise RuntimeError("main.c-Lauf fehlgeschlagen:\n" + res.stderr)
     raw = np.loadtxt(OUTPUT, delimiter=",", skiprows=1)
     t = raw[:, 0] / FS
     x, xhat, err = raw[:, 1], raw[:, 2], raw[:, 3]
-    coeffs = raw[:, 4:4 + NUM_COEFFS].T
+    p = len(delays)
+    coeffs = raw[:, 4:4 + p].T
     return t, x, xhat, err, coeffs

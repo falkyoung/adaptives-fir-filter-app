@@ -1,21 +1,31 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define P 16          // 16 Koeffizienten
-#define MU 0.02       // Lernrate
-
 int main(int argc, char **argv) {
-    if (argc < 3) {
-        fprintf(stderr, "Aufruf: %s <samples.txt> <output.csv>\n", argv[0]);
+    if (argc < 5) {
+        fprintf(stderr, "Aufruf: %s <samples.txt> <output.csv> <MU> <d1> [d2 ...]\n",
+                argv[0]);
         return 1;
     }
+
+    double mu = atof(argv[3]);
+    int P = argc - 4;                 // so viele Taps wie Verzoegerungen
+
+    int *delay = malloc(P * sizeof(int));
+    int max_delay = 0;
+    for (int k = 0; k < P; k++) {
+        delay[k] = atoi(argv[4 + k]);
+        if (delay[k] > max_delay) max_delay = delay[k];
+    }
+
     FILE *in = fopen(argv[1], "r");
     if (!in) { perror("Eingabedatei"); return 1; }
     FILE *out = fopen(argv[2], "w");
     if (!out) { perror("Ausgabedatei"); fclose(in); return 1; }
 
-    double a[P] = {0.0};         // Filterkoeffizienten (starten bei 0)
-    double x_history[P] = {0.0}; // Verzögerungsleitung (Vergangenheit)
+    double *a = calloc(P, sizeof(double));            // Koeffizienten (start 0)
+    double *hist = calloc(max_delay, sizeof(double)); // Vergangenheit:
+                                                      // hist[d-1] = x(t-d)
 
     fprintf(out, "t,x,x_hat,error");
     for (int k = 0; k < P; k++) fprintf(out, ",a%d", k);
@@ -24,37 +34,39 @@ int main(int argc, char **argv) {
     double x_current;
     long t = 0;
 
-    // Adaptives FIR ab hier
     while (fscanf(in, "%lf", &x_current) == 1) {
 
-        // Phase 1: Schätzung
+        // Phase 1: Schaetzung aus den gewaehlten Vergangenheitswerten
         double x_dach = 0.0;
         for (int k = 0; k < P; k++) {
-            x_dach += a[k] * x_history[k];
+            x_dach += a[k] * hist[delay[k] - 1];
         }
 
-        // Fehler berechnen
+        // Fehler
         double error = x_current - x_dach;
 
-        // Phase 2: Koeffizienten-Anpassung (Gradientenabstieg / LMS)
-        // Abgeleitet ergibt sich: Delta_a = MU * error * x_past
+        // Phase 2: Koeffizienten anpassen (LMS: Delta_a = MU * error * x_past)
         for (int k = 0; k < P; k++) {
-            a[k] += MU * error * x_history[k];
+            a[k] += mu * error * hist[delay[k] - 1];
         }
 
-        // (für Plots)
+        // (fuer Plots)
         fprintf(out, "%ld,%f,%f,%f", t, x_current, x_dach, error);
         for (int k = 0; k < P; k++) fprintf(out, ",%f", a[k]);
         fprintf(out, "\n");
 
-        // Verzögerungsleitung aktualisieren
-        for (int k = P - 1; k > 0; k--) {
-            x_history[k] = x_history[k - 1];
+        // Verzoegerungsleitung weiterschieben, neuen Wert vorne einsetzen
+        for (int i = max_delay - 1; i > 0; i--) {
+            hist[i] = hist[i - 1];
         }
-        x_history[0] = x_current;
+        hist[0] = x_current;
         t++;
     }
 
+    free(delay);
+    free(a);
+    free(hist);
     fclose(in);
     fclose(out);
+    return 0;
 }
